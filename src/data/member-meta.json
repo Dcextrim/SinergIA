@@ -48,5 +48,10 @@
     "h": 1.0,
     "cutL": false,
     "cutR": false
+  },
+  "byte": {
+    "h": 1.0,
+    "cutL": false,
+    "cutR": false
   }
 }

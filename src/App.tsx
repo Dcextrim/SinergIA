@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Intro } from "./components/Intro";
 import { DetailWarmup, MemberDetail } from "./components/MemberDetail";
 import { MembersScene } from "./components/MembersScene";
-import { members } from "./data/members";
+import { fullName, members } from "./data/members";
 
 const STORAGE_KEY = "sinergia-unlocked-members";
 
@@ -100,14 +100,14 @@ export default function App() {
             <li key={m.id} className="flex items-center justify-between gap-4 border-b border-frost/10 py-4">
               <div>
                 <p className="font-medium">
-                  {m.firstName} {m.lastName}
+                  {fullName(m)}
                 </p>
                 <p className="text-sm text-frost/60">{m.role}</p>
               </div>
               <button
                 type="button"
                 onClick={() => select(m.id)}
-                aria-label={`Ver perfil de ${m.firstName} ${m.lastName}`}
+                aria-label={`Ver perfil de ${fullName(m)}`}
                 className="min-h-11 shrink-0 rounded-full border border-sky/40 px-4 text-sm text-sky hover:border-sky hover:bg-sky/10"
               >
                 Ver perfil

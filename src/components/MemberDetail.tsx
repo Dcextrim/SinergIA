@@ -2,7 +2,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useEffect, useRef, useState } from "react";
 import { buildReveal, EXIT_SPEED } from "../animation/reveal";
-import { fadeMask, img, members, type Member } from "../data/members";
+import { fadeMask, fullName, img, members, type Member } from "../data/members";
 import { Wave } from "./Wave";
 
 gsap.registerPlugin(useGSAP);
@@ -123,7 +123,7 @@ export function MemberDetail({ member, sceneRef, side, onOpened, onClosed }: Pro
     }
   };
 
-  const name = `${member.firstName} ${member.lastName}`;
+  const name = fullName(member);
 
   return (
     <div
@@ -153,13 +153,19 @@ export function MemberDetail({ member, sceneRef, side, onOpened, onClosed }: Pro
       />
 
       <div
-        className={`relative mx-auto flex min-h-full max-w-6xl flex-col items-center gap-6 px-4 py-6 md:items-center md:justify-center md:gap-[6%] md:px-8 ${
+        className={`relative mx-auto flex min-h-full flex-col items-center gap-6 px-4 py-6 md:items-center md:justify-center md:gap-16 md:px-8 ${
           side === "left" ? "md:flex-row" : "md:flex-row-reverse"
         }`}
       >
-        <div className="relative h-[52vh] shrink-0 md:h-[84vh]" style={{ aspectRatio: aspect }}>
+        {/* alto tope por ancho: la foto usa lo que deja la tarjeta (su ancho + 8rem de gap y margenes),
+            asi una foto ancha (Byte) sale grande sin angostar la tarjeta */}
+        <div
+          className="relative h-[min(52vh,calc((100vw_-_2rem)/var(--a)))] shrink-0 md:h-[min(84vh,calc((100vw_-_min(34rem,40vw)_-_8rem)/var(--a)))]"
+          // contenedor de tamano: la inicial gigante se mide contra la foto (100cqh), no contra la ventana
+          style={{ aspectRatio: aspect, "--a": aspect, containerType: "size" } as React.CSSProperties}
+        >
           <span
-            className="letter pointer-events-none absolute inset-0 flex select-none items-center justify-center font-display text-[52vh] leading-none text-sky/20 md:text-[84vh]"
+            className="letter pointer-events-none absolute inset-0 flex select-none items-center justify-center font-display text-[length:100cqh] leading-none text-sky/20"
             aria-hidden
           >
             {member.firstName[0]}
@@ -188,11 +194,11 @@ export function MemberDetail({ member, sceneRef, side, onOpened, onClosed }: Pro
           </button>
         </div>
 
-        <article className="card w-full max-w-md rounded-[28px] bg-sky px-7 py-8 text-ink opacity-0 shadow-[0_30px_80px_-30px_rgb(61_224_255/0.45)] md:w-[38%] md:max-w-none md:px-10 md:py-12">
+        <article className="card w-full max-w-md rounded-[28px] bg-sky px-7 py-8 text-ink opacity-0 shadow-[0_30px_80px_-30px_rgb(61_224_255/0.45)] md:w-[min(34rem,40vw)] md:max-w-none md:shrink-0 md:px-10 md:py-12">
           <p className="font-hand text-5xl leading-none text-white" aria-hidden>Soy</p>
           {/* en la campana el nombre va en blanco; aqui en marino para que se lea (contraste 5:1 sobre el celeste) */}
           <h2 id="detail-name" className="mt-1 font-display text-6xl uppercase leading-[0.92] text-navy md:text-7xl">
-            {[member.firstName, member.lastName].map((part) => (
+            {[member.firstName, member.lastName].filter(Boolean).map((part) => (
               <span key={part} className="block overflow-hidden">
                 <span className="line block">{part}</span>
               </span>

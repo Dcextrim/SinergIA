@@ -6,8 +6,8 @@ fila de siluetas quede pareja.
 
 Uso: python -X utf8 tools/prepare_assets.py ../Imagenes public
 """
-import base64, io, re, sys, pathlib
-from PIL import Image
+import base64, io, re, sys, pathlib, zipfile
+from PIL import Image, ImageDraw, ImageFilter
 
 SRC = pathlib.Path(sys.argv[1])
 OUT = pathlib.Path(sys.argv[2])
@@ -24,19 +24,51 @@ SIZES = {"lg": 1400, "sm": 640}  # alto en px
 
 
 def embedded(n):
-    data = (SRC / f"{n}.svg").read_bytes()
+    data = n if isinstance(n, bytes) else (SRC / f"{n}.svg").read_bytes()
     return [Image.open(io.BytesIO(base64.b64decode(re.sub(rb"\s", b"", m.group(1)))))
             for m in PAT.finditer(data)]
 
 
-def cutout(n, pick=0):
-    """pick-esimo par foto+mascara del SVG (19.svg trae el logo y luego a Byte)."""
+def black_mouth(r):
+    """Byte: pinta de negro el interior de la boca del disfraz (se veia la cara de quien lo lleva) y deja los
+    dientes. Coordenadas medidas en la foto de 2.svg (1200x1600); dentro de la elipse se oscurece lo oscuro
+    o color piel, y se rellenan los reflejos horizontales del plastico."""
+    TEETH = 585  # arriba de esta fila estan los dientes superiores: ahi solo cuentan los huecos oscuros
+    region = Image.new("L", r.size, 0)
+    ImageDraw.Draw(region).ellipse((503, 574, 610, 625), fill=255)
+    px, rp = r.load(), region.load()
+    mouth = Image.new("L", r.size, 0)
+    mp = mouth.load()
+    for y in range(570, 630):
+        for x in range(495, 615):
+            if rp[x, y]:
+                R, G, B = px[x, y]
+                lum = 0.299 * R + 0.587 * G + 0.114 * B
+                if (lum < 110) if y < TEETH else (lum < 150 or R - B > 45):
+                    mp[x, y] = 255
+    mouth = mouth.filter(ImageFilter.MaxFilter(3)).filter(ImageFilter.MinFilter(3))
+    col = mouth.load()
+    for x in range(495, 615):
+        ys = [y for y in range(TEETH, 630) if col[x, y]]
+        for a, b in zip(ys, ys[1:]):
+            if 1 < b - a <= 12:
+                for y in range(a, b):
+                    col[x, y] = 255
+    mouth = Image.composite(mouth, Image.new("L", r.size, 0), region)
+    r.paste((20, 14, 26), mask=mouth)
+
+
+def cutout(n, pick=0, edit=None):
+    """pick-esimo par foto+mascara del SVG (n = numero en SRC o el SVG en bytes; 19.svg trae el logo y luego a Byte).
+    `edit` retoca la foto en su tamano original, antes de recortar."""
     ims = embedded(n)
     masks = [i for i in ims if i.mode == "L"]
     found = []
     for m in masks:
         for r in ims:
             if r.mode == "RGB" and r.size == m.size and min(r.size) > 800:
+                if edit:
+                    edit(r)
                 rgba = r.convert("RGBA")
                 rgba.putalpha(m)
                 found.append(rgba.crop(m.point(lambda v: 255 if v > 20 else 0).getbbox()))
@@ -57,9 +89,15 @@ def cut_side(alpha, x):
     return sum(col) / len(col) > 0.05
 
 
+# Byte con el disfraz (aletas abajo): viene en un zip de Canva junto a SRC. "Cabeza" = 0.135 deja
+# del hocico a la cintura, como los recortes de los miembros.
+with zipfile.ZipFile(SRC.parent / "Diseño sin título.zip") as z:
+    BYTE_SVG = z.read("2.svg")
+MEMBERS[BYTE_SVG] = ("byte", 0.135)
+
 meta = {}
 for n, (mid, head) in MEMBERS.items():
-    im = cutout(n)
+    im = cutout(n, edit=black_mouth if mid == "byte" else None)
     h = round(im.height * head / HEAD)  # alto normalizado para que la cabeza ocupe HEAD
     body = im.crop((0, 0, im.width, min(h, im.height)))
     a = body.getchannel("A")

@@ -1,5 +1,5 @@
 import { useState, useSyncExternalStore } from "react";
-import { fadeMask, img, members, meta, type Member } from "../data/members";
+import { fadeMask, fullName, img, members, meta, type Member } from "../data/members";
 
 type Props = {
   sceneRef: React.RefObject<HTMLDivElement | null>;
@@ -16,7 +16,7 @@ const preload = (id: string) => {
 
 function MemberButton({ m, state, onSelect }: { m: Member; state: string; onSelect: (id: string) => void }) {
   const [broken, setBroken] = useState(false);
-  const name = `${m.firstName} ${m.lastName}`;
+  const name = fullName(m);
   return (
     <button
       type="button"
@@ -40,25 +40,34 @@ function MemberButton({ m, state, onSelect }: { m: Member; state: string; onSele
       {broken ? (
         <span className="pointer-events-auto flex h-full w-24 items-end justify-center pb-6 font-display text-sm text-frost/60">{name}</span>
       ) : (
-        // solo la foto recibe clics, no el margen del boton
+        // solo la foto recibe clics, no el margen del boton (o solo su zona `hit`, si la tiene)
         <img
-          className="member-img pointer-events-auto h-full w-auto select-none"
+          className={`member-img h-full w-auto select-none ${m.hit ? "pointer-events-none" : "pointer-events-auto"}`}
           src={img(m.id, "sm")}
           alt=""
           draggable={false}
           onError={() => setBroken(true)}
         />
       )}
+      {m.hit && !broken && (
+        // misma caja que la foto (el boton tiene PAD alrededor); solo la franja interior recibe clics
+        <span className="pointer-events-none absolute" style={{ inset: PAD }}>
+          <span className="pointer-events-auto absolute" style={{ inset: m.hit }} />
+        </span>
+      )}
     </button>
   );
 }
 
 // Filas de la escena: [cuantas personas, top %, alto %, separacion %], en el orden de `members`.
-// Piramide: vocales al fondo, secretario y tesorero abiertos a los lados (separacion) para que se les
-// vea la cara detras de presidenta y vicepresidenta, que van al frente.
+// Piramide: vocales al fondo, Byte solo en su fila (mas alto, asoma en el hueco del medio), secretario y
+// tesorero abiertos a los lados para que se les vea la cara detras de presidenta y vicepresidenta, al frente.
 const LAYOUTS = {
-  desktop: { aspect: "16 / 9", rows: [[6, 0, 55, 0], [2, 20, 60, 20], [2, 38, 62, 0]] },
-  mobile: { aspect: "1 / 1.25", rows: [[3, 0, 32, 0], [3, 16, 34, 0], [2, 34, 36, 28], [2, 54, 46, 0]] },
+  desktop: { aspect: "16 / 9", rows: [[6, 0, 55, 0], [1, 10, 66, 0], [2, 20, 60, 20], [2, 38, 62, 0]] },
+  mobile: {
+    aspect: "1 / 1.25",
+    rows: [[3, 0, 32, 0], [3, 16, 34, 0], [1, 26, 38, 0], [2, 34, 36, 28], [2, 54, 46, 0]],
+  },
 } as const;
 
 const mobileQuery = window.matchMedia("(max-width: 639px)");

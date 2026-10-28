@@ -6,10 +6,11 @@ export type Member = {
   lastName: string;
   role: string;
   bio: string; // adaptada de su publicacion de campana en Instagram (Bios/descripciones.md)
+  hit?: string; // zona de clic mas chica que la foto (CSS inset): lo demas deja pasar el clic a quien esta atras
 };
 
-// Orden de la escena, de atras hacia adelante: los 6 vocales, luego secretario y tesorero,
-// y al frente presidenta y vicepresidenta. Las filas se definen en LAYOUTS (components/MembersScene.tsx).
+// Orden de la escena, de atras hacia adelante: los 6 vocales, Byte (la mascota, en el hueco del medio),
+// luego secretario y tesorero, y al frente presidenta y vicepresidenta. Las filas se definen en LAYOUTS (components/MembersScene.tsx).
 // Fotos: public/members/<id>-sm.webp (escena) y <id>-lg.webp (detalle), generadas con tools/prepare_assets.py
 export const members: Member[] = [
   {
@@ -37,6 +38,12 @@ export const members: Member[] = [
     bio: "Me apasiona la tecnología, en especial la ciencia de datos y la inteligencia artificial, y disfruto experimentar con ideas para resolver problemas reales. Quiero que SinergIA sea un espacio para colaborar, intercambiar conocimientos y llevar nuestras ideas a la práctica.",
   },
   {
+    // adaptada de las publicaciones de presentacion (SinergIA 2025) y de regreso (2026)
+    // la foto es ancha por las aletas y tapaba el clic de los vocales de al lado: solo hocico y cuerpo
+    id: "byte", firstName: "Byte", lastName: "", role: "Mascota oficial", hit: "0 33% 25% 33%",
+    bio: "Nací en 2025 con la planilla SinergIA y este año estoy de regreso. Represento la energía, la curiosidad y la determinación de los estudiantes de Computación y TI de la UVG, y acompaño cada iniciativa, proyecto y actividad. Les recuerdo que la innovación no solo está en la tecnología, sino también en las personas y en las ideas que nos atrevemos a hacer realidad.",
+  },
+  {
     id: "raul", firstName: "Raúl", lastName: "Godínez", role: "Secretario",
     bio: "Voy en segundo año de Computación, formo parte del equipo del Laboratorio Aeroespacial y fuera de la carrera disfruto los videojuegos y la lectura. Quiero crear más oportunidades para que estudiantes de todos los años nos conozcamos y trabajemos juntos, con actividades que también sumen horas de beca y de extensión.",
   },
@@ -54,7 +61,10 @@ export const members: Member[] = [
   },
 ];
 
-export const img = (id: string, size: "sm" | "lg") => `/members/${id}-${size}.webp`;
+// Byte no tiene apellido: sin espacios sobrantes en etiquetas y textos
+export const fullName = (m: Member) => [m.firstName, m.lastName].filter(Boolean).join(" ");
+
+export const img =(id: string, size: "sm" | "lg") => `/members/${id}-${size}.webp`;
 
 // Datos medidos por tools/prepare_assets.py: alto relativo del recorte y si la foto viene cortada a los lados
 export const meta = memberMeta as Record<string, { h: number; cutL: boolean; cutR: boolean }>;
