@@ -1,0 +1,52 @@
+{
+  "cindy": {
+    "h": 1.0,
+    "cutL": false,
+    "cutR": false
+  },
+  "sarah": {
+    "h": 0.8463,
+    "cutL": true,
+    "cutR": true
+  },
+  "raul": {
+    "h": 0.8799,
+    "cutL": true,
+    "cutR": true
+  },
+  "javier": {
+    "h": 0.9565,
+    "cutL": false,
+    "cutR": false
+  },
+  "sebastian": {
+    "h": 0.9165,
+    "cutL": false,
+    "cutR": false
+  },
+  "nathalia-escobar": {
+    "h": 1.0,
+    "cutL": false,
+    "cutR": false
+  },
+  "nathalia-caceres": {
+    "h": 1.0,
+    "cutL": false,
+    "cutR": false
+  },
+  "fabian": {
+    "h": 0.9566,
+    "cutL": true,
+    "cutR": false
+  },
+  "daniel": {
+    "h": 0.9565,
+    "cutL": true,
+    "cutR": true
+  },
+  "natalia-roches": {
+    "h": 1.0,
+    "cutL": false,
+    "cutR": false
+  }
+}

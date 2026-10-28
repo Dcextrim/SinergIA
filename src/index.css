@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+/* Colores medidos en el logo y en las piezas de campana */
+@theme {
+  --color-ink: #070b16;
+  --color-night: #0e1630;
+  --color-navy: #0a4078;
+  --color-violet: #502090;
+  --color-wave: #544d8e;
+  --color-sky: #81c2d4;
+  --color-rim: #3de0ff;
+  --color-frost: #eef2f8;
+  --color-amber: #ffb547;
+
+  --font-display: "Anton", Impact, sans-serif;
+  --font-hand: "Caveat", "Segoe Print", cursive;
+  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
+
+  --ease-signature: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html {
+  background: var(--color-ink);
+  color: var(--color-frost);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-rim);
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+/* Estados de la silueta: el filtro vive en CSS para que hover/foco no necesiten JS */
+.member-img {
+  transition: filter 90ms var(--ease-signature);
+}
+/* rim light: un borde nitido de marca separa siluetas que se enciman */
+.member[data-state="locked"] .member-img {
+  filter: brightness(0.06) saturate(0) drop-shadow(0 -1px 0 rgb(129 194 212 / 0.8))
+    drop-shadow(0 0 1.5px rgb(129 194 212 / 0.7)) drop-shadow(0 0 9px rgb(80 32 144 / 0.6));
+}
+.member[data-state="locked"]:hover .member-img,
+.member[data-state="locked"]:focus-visible .member-img {
+  filter: brightness(0.1) saturate(0) drop-shadow(0 -1px 0 rgb(61 224 255 / 1))
+    drop-shadow(0 0 2px rgb(61 224 255 / 1)) drop-shadow(0 0 10px rgb(61 224 255 / 0.55));
+}
+/* el foco ya se ve en el brillo de la silueta; el rectangulo del outline sobra */
+.member:focus-visible {
+  outline: none;
+}
+/* la persona resaltada se ve completa, sin que la tape quien esta al lado (solo dentro de su fila) */
+.member:hover,
+.member:focus-visible {
+  z-index: 5 !important;
+}
+.member[data-state="unlocked"] .member-img {
+  filter: drop-shadow(0 0 9px rgb(129 194 212 / 0.35));
+}
+
+/* Luz ambiental: deriva lenta (capa ambiental), apagada con movimiento reducido */
+.ambient {
+  background:
+    radial-gradient(closest-side at 32% 58%, rgb(80 32 144 / 0.45), transparent),
+    radial-gradient(closest-side at 68% 45%, rgb(10 64 120 / 0.6), transparent);
+  animation: drift 14s ease-in-out infinite alternate;
+}
+@keyframes drift {
+  to {
+    transform: translate3d(4%, -3%, 0) scale(1.08);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ambient {
+    animation: none;
+  }
+}
